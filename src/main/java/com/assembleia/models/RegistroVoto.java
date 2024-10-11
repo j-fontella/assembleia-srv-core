@@ -29,6 +29,11 @@ public class RegistroVoto {
     @JoinColumn(name = "sessao_id")
     private Sessao sessao;
 
-    private Integer idAssociado;
+    private Long idAssociado;
 
+    public RegistroVoto(Voto voto, Sessao sessao, Long idAssociado) {
+        this.voto = voto;
+        this.sessao = sessao;
+        this.idAssociado = idAssociado;
+    }
 }

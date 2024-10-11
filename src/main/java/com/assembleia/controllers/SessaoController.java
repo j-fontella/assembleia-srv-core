@@ -1,6 +1,7 @@
 package com.assembleia.controllers;
 
 import com.assembleia.dto.request.RegistrarSessaoDTO;
+import com.assembleia.dto.request.RegistroVotoDTO;
 import com.assembleia.services.SessaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class SessaoController {
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@RequestBody @Valid RegistrarSessaoDTO dto) {
         return sessaoService.registrar(dto);
+    }
+
+    @PostMapping("/votar")
+    public ResponseEntity<?> votar(@RequestBody @Valid RegistroVotoDTO dto) {
+        return sessaoService.votar(dto);
     }
 
 
