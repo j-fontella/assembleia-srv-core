@@ -22,15 +22,13 @@ public class RegistroVoto {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "associado_id")
-    private Associado associado;
-
     @Enumerated(STRING)
     private Voto voto;
 
     @ManyToOne
     @JoinColumn(name = "sessao_id")
     private Sessao sessao;
+
+    private Integer idAssociado;
 
 }

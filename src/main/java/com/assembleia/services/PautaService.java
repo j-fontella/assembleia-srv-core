@@ -12,6 +12,7 @@ import com.assembleia.repositorys.PautaRepository;
 import java.util.Optional;
 
 import static com.assembleia.domain.Erro.PAUTA_JA_CADASTRADA;
+import static com.assembleia.domain.Erro.PAUTA_NAO_CADASTRADA;
 
 @Service
 public class PautaService {
@@ -28,6 +29,14 @@ public class PautaService {
         Pauta novaPauta = new ModelMapper().map(dto, Pauta.class);
         pautaRepository.save(novaPauta);
         return ResponseEntity.ok().build();
+    }
+
+    public Pauta buscarPauta(Long id){
+        Optional<Pauta> pauta = pautaRepository.findById(id);
+        if(pauta.isEmpty()){
+            throw new NegocioException(PAUTA_NAO_CADASTRADA);
+        }
+        return pauta.get();
     }
 
     private void validarPautaRegistrada(RegistrarPautaDTO dto) {

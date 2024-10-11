@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.assembleia.utils.ValueUtils.isNotEmpty;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -30,8 +31,11 @@ public class Sessao {
     @OneToMany(mappedBy = "sessao", cascade = ALL)
     private List<RegistroVoto> votos;
 
-    private LocalDateTime inicio;
+    private LocalDateTime dataHoraFinalSessao;
 
-    private LocalDateTime fim;
+    public Sessao(Pauta pauta, LocalDateTime dataHoraFinalSessao) {
+        this.pauta = pauta;
+        this.dataHoraFinalSessao = isNotEmpty(dataHoraFinalSessao) ? dataHoraFinalSessao : LocalDateTime.now().plusMinutes(1);
+    }
 
 }
