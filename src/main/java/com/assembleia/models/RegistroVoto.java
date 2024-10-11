@@ -5,6 +5,8 @@ import com.assembleia.domain.Voto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static com.assembleia.domain.Voto.NAO;
+import static com.assembleia.domain.Voto.SIM;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -36,4 +38,12 @@ public class RegistroVoto {
         this.sessao = sessao;
         this.idAssociado = idAssociado;
     }
+
+    public boolean isVotoPositivo(){
+        return SIM.equals(voto);
+    }
+    public boolean isVotoNegativo(){
+        return NAO.equals(voto);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.assembleia.services;
 import com.assembleia.domain.Voto;
 import com.assembleia.dto.request.RegistrarSessaoDTO;
 import com.assembleia.dto.request.RegistroVotoDTO;
+import com.assembleia.dto.response.ResultadoVotacaoDTO;
 import com.assembleia.exceptions.NegocioException;
 import com.assembleia.models.Pauta;
 import com.assembleia.models.RegistroVoto;
@@ -46,7 +47,7 @@ public class SessaoService {
     }
 
     public ResponseEntity<?> votar(RegistroVotoDTO dto) {
-        Sessao sessao = buscarSessao(dto.getIdSessao());
+        Sessao sessao = buscarSessao(dto.getIdSessao(), true);
         registroVotoService.validaVotoAssociado(sessao, dto.getIdAssociado());
         registrarVoto(sessao, dto.getIdAssociado(), dto.getVoto());
         return ResponseEntity.ok().build();
@@ -57,7 +58,31 @@ public class SessaoService {
         registroVotoService.salvar(registroVoto);
     }
 
-    private Sessao buscarSessao(Long id){
+    public ResponseEntity<ResultadoVotacaoDTO> contabilizar(Long idSessao) {
+        Sessao sessao = buscarSessao(idSessao, false);
+        return ResponseEntity.ok().body(gerarResultadoVotacao(sessao));
+    }
+
+    private ResultadoVotacaoDTO gerarResultadoVotacao(Sessao sessao) {
+        long quantidadeSim = sessao.getVotos().stream().filter(RegistroVoto::isVotoPositivo).count();
+        long quantidadeNao = sessao.getVotos().stream().filter(RegistroVoto::isVotoNegativo).count();
+        String aprovado = getMensagemAprovacao(quantidadeSim, quantidadeNao);
+
+        return ResultadoVotacaoDTO.builder()
+                .descricaoPauta(sessao.getPauta().getDescricao())
+                .quantidadeSim(quantidadeSim)
+                .quantidadeNao(quantidadeNao)
+                .resultado(aprovado).build();
+    }
+
+    private String getMensagemAprovacao(long quantidadeSim, long quantidadeNao) {
+        if(quantidadeSim == quantidadeNao){
+            return "Empate";
+        }
+        return quantidadeSim > quantidadeNao ? "Aprovado" : "Reprovado";
+    }
+
+    private Sessao buscarSessao(Long id, boolean validarExpiracao){
         Optional<Sessao> buscaSessao = sessaoRepository.findById(id);
         if(buscaSessao.isEmpty()){
             throw new NegocioException(SESSAO_NAO_CADASTRADA);
@@ -65,12 +90,11 @@ public class SessaoService {
 
         Sessao sessao = buscaSessao.get();
 
-        if(sessao.getDataHoraFinalSessao().isBefore(now())){
+        if(validarExpiracao && sessao.getDataHoraFinalSessao().isBefore(now())){
             throw new NegocioException(SESSAO_ENCERRADA);
         }
 
         return sessao;
     }
-
 
 }
