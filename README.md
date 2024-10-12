@@ -1,4 +1,4 @@
-# Nome do Projeto
+# Gestor de Assembleias
 
 Projeto para gerenciar votação de pautas em sessões de assembleias
 
