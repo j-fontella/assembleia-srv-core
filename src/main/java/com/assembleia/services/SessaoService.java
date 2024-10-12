@@ -5,6 +5,7 @@ import com.assembleia.dto.request.RegistrarSessaoDTO;
 import com.assembleia.dto.request.RegistroVotoDTO;
 import com.assembleia.dto.response.ResultadoVotacaoDTO;
 import com.assembleia.exceptions.NegocioException;
+import com.assembleia.kafka.KafkaProducer;
 import com.assembleia.models.Pauta;
 import com.assembleia.models.RegistroVoto;
 import com.assembleia.models.Sessao;
@@ -24,12 +25,14 @@ public class SessaoService {
     private final SessaoRepository sessaoRepository;
     private final PautaService pautaService;
     private final RegistroVotoService registroVotoService;
+    private final KafkaProducer kafkaProducer;
 
     @Autowired
-    public SessaoService(SessaoRepository sessaoRepository, PautaService pautaService, RegistroVotoService registroVotoService) {
+    public SessaoService(SessaoRepository sessaoRepository, PautaService pautaService, RegistroVotoService registroVotoService, KafkaProducer kafkaProducer) {
         this.sessaoRepository = sessaoRepository;
         this.pautaService = pautaService;
         this.registroVotoService = registroVotoService;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public ResponseEntity<?> registrar(RegistrarSessaoDTO dto) {
@@ -60,7 +63,9 @@ public class SessaoService {
 
     public ResponseEntity<ResultadoVotacaoDTO> contabilizar(Long idSessao) {
         Sessao sessao = buscarSessao(idSessao, false);
-        return ResponseEntity.ok().body(gerarResultadoVotacao(sessao));
+        ResultadoVotacaoDTO resultado = gerarResultadoVotacao(sessao);
+        kafkaProducer.enviarResultado(resultado);
+        return ResponseEntity.ok().body(resultado);
     }
 
     private ResultadoVotacaoDTO gerarResultadoVotacao(Sessao sessao) {
